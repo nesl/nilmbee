@@ -3,12 +3,17 @@
 
 import serial
 import sys
+import time, datetime
 
 if len(sys.argv) < 2:
     print "Usage: ./dumpdata.py serial_port"
     exit()
 
 ser = serial.Serial(sys.argv[1], 115200)
+olddata = 0
+packetlost = 0
+packetrecv = 0
+begintime = 0
 
 while 1:
     d = 0
@@ -30,8 +35,22 @@ while 1:
         continue
     d += (x & 0x0F);
 
-    s = "RECV %x(%d) (id=%d, gp=%d, idx=%d, seq=%d, active=%d)"
-    s = s % (d, d, (d&0xFC00)>>10, (d&0x0300)>>8, (d&0xE)>>1, (d&0xF0)>>4, d&0x1)
+    #if olddata: 
+    #    packetlost += d-olddata-1
+    #else:
+    #    begintime = time.time()
+    #olddata = d
+    #packetrecv += 1
+
+    s = "%f(%s) %x(%d) (id=%d, gp=%d, idx=%d, seq=%d, active=%d)"
+    timestamp = time.time();
+    hr_time = str(datetime.datetime.fromtimestamp(timestamp))
+    s = s % (timestamp, hr_time, d, d, (d&0xFC00)>>10, (d&0x0300)>>8, (d&0xE)>>1, (d&0xF0)>>4, d&0x1)
     
     print s
+    #elaspedtime = time.time()-begintime
+    #print "%d %d/%d" % (d, packetlost, (packetlost+packetrecv))
+    #if (packetlost+packetrecv)==100:
+    #    print "recv 100 pkts in %f sec, %f pkts/sec, lost rate: %f%%" % (elaspedtime, 100.0/elaspedtime, (packetlost*100.0)/(packetlost+packetrecv))
+        
     

@@ -4,7 +4,7 @@
 #include <util/delay.h>
 
 void tx_word(uint16_t d);
-uint16_t x = 1;
+uint16_t x = 0;
 
 void main(void)
 {
@@ -17,7 +17,9 @@ void main(void)
     
     while(1) {
         tx_word(x++);
-        _delay_ms(400);
+        for (uint8_t i=0; i<8; i++) {
+            _delay_loop_1(0);
+        }
     }
 }
 

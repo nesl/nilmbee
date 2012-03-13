@@ -4,7 +4,7 @@
 #include <util/delay.h>
 #include "rf.h"
 
-const uint8_t NODE_ID = 5;
+#include "nodeid.h"
 
 Message msg;
 uint8_t delay_count = 0;
@@ -41,7 +41,7 @@ int main(void)
 {
     //uint8_t last_is_zero = 1;
 
-    uint8_t i, is_active;
+    uint8_t i, dirty;
     uint8_t adcv, adcmax, adcmin;
     uint8_t score = 0, score_shifter = 0;
 
@@ -66,7 +66,7 @@ int main(void)
         //is_active = (adcmax - adcmin > 3);
         //score = score + is_active - (score_shifter >= 0x80);
         //score_shifter = (score_shifter<<1) | is_active;
-        adcmin += 4;
+        adcmin += 10;
         asm (
             "cp   %2, %3" "\n\t"
             "brcc L_sc1 " "\n\t"
@@ -80,11 +80,20 @@ int main(void)
             : "r" (adcmin), "r" (adcmax), "r" (score), "r" (score_shifter)
         );
         
-        is_active = (score > 2);
-        if (is_active ^ (msg.byte2 & 1)) {
-            // emu: msg.is_zero = is_zero;
+        dirty = 0;
+        if ((score <= 2) && (msg.byte2 & 1)) {
+            dirty = 1;
+            // emu: msg.is_active = 0;
             // emu: msg.delay_pos = 0;
-            msg.byte2 = (msg.byte2 & 0xF0) | is_active;
+            msg.byte2 = (msg.byte2 & 0xF0);
+        }
+        if ((score >= 6) && !(msg.byte2 & 1)) {
+            dirty = 1;
+            // emu: msg.is_active = 1;
+            // emu: msg.delay_pos = 0;
+            msg.byte2 = (msg.byte2 & 0xF0) | 0x1;
+        }
+        if (dirty) {
             // emu: msg.delay_grp = 0;
             msg.byte1 &= ~0x3;
             
