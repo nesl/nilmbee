@@ -9,7 +9,7 @@ else
         echo "const uint8_t NODE_ID = $s;" > nodeid.h
         echo "Press any key to programming node #$s ..."
         read -n1 -s
-        make program
+        make program-all
         echo "Finished"
     else
         echo "Programming node #$s - #$2 ..."
@@ -17,7 +17,7 @@ else
             echo "const uint8_t NODE_ID = $s;" > nodeid.h
             echo "Press any key to programming node #$s ..."
             read -n1 -s
-            make program
+            make program-all
             s=`expr $s + 1`
         done
         echo "Finished"
