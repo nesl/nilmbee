@@ -22,7 +22,7 @@ void inline adc_init(void)
 
 void inline pin_init(void)
 {
-    DDRB = 0x09;
+    DDRB = 0x01;
     PORTB |= (1<<3);
     PCMSK = (1<<1);
     PCICR = (1<<0);
@@ -81,13 +81,13 @@ int main(void)
         );
         
         dirty = 0;
-        if ((score <= 2) && (msg.byte2 & 1)) {
+        if ((PINB & (1<<3)) && (msg.byte2 & 1)) {
             dirty = 1;
             // emu: msg.is_active = 0;
             // emu: msg.delay_pos = 0;
             msg.byte2 = (msg.byte2 & 0xF0);
         }
-        if ((score >= 6) && !(msg.byte2 & 1)) {
+        if (!(PINB & (1<<3)) && !(msg.byte2 & 1)) {
             dirty = 1;
             // emu: msg.is_active = 1;
             // emu: msg.delay_pos = 0;
