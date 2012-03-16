@@ -9,7 +9,13 @@ if len(sys.argv) < 2:
     print "Usage: ./dumpdata.py serial_port"
     exit()
 
+ser = serial.Serial(sys.argv[1], 115200, timeout=0.2)
+
+c = ser.read(16384)
+ser.close()
+
 ser = serial.Serial(sys.argv[1], 115200)
+
 olddata = 0
 packetlost = 0
 packetrecv = 0
