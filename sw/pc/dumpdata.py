@@ -9,6 +9,11 @@ if len(sys.argv) < 2:
     print "Usage: ./dumpdata.py serial_port"
     exit()
 
+ser = serial.Serial(sys.argv[1], 115200, timeout=0.2)
+
+c = ser.read(16384)
+ser.close()
+
 ser = serial.Serial(sys.argv[1], 115200)
 olddata = 0
 packetlost = 0
@@ -35,12 +40,12 @@ while 1:
         continue
     d += (x & 0x0F);
 
-    #if olddata: 
-    #    packetlost += d-olddata-1
-    #else:
-    #    begintime = time.time()
-    #olddata = d
-    #packetrecv += 1
+    if olddata: 
+        packetlost += d-olddata-1
+    else:
+        begintime = time.time()
+    olddata = d
+    packetrecv += 1
 
     s = "%f(%s) %x(%d) (id=%d, gp=%d, idx=%d, seq=%d, active=%d)"
     timestamp = time.time();
@@ -50,7 +55,7 @@ while 1:
     print s
     #elaspedtime = time.time()-begintime
     #print "%d %d/%d" % (d, packetlost, (packetlost+packetrecv))
-    #if (packetlost+packetrecv)==100:
+    #if (packetlost+packetrecv) % 100 == 0:
     #    print "recv 100 pkts in %f sec, %f pkts/sec, lost rate: %f%%" % (elaspedtime, 100.0/elaspedtime, (packetlost*100.0)/(packetlost+packetrecv))
         
     

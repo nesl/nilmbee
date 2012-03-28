@@ -17,9 +17,11 @@ void main(void)
     
     while(1) {
         tx_word(x++);
-        for (uint8_t i=0; i<8; i++) {
+//        tx_word(x++);
+        for (uint8_t i=0; i<64; i++) {
             _delay_loop_1(0);
         }
+//        _delay_ms(400);
     }
 }
 
@@ -35,20 +37,30 @@ void tx_word(uint16_t d)
     DATAH; 
     for (i=0; i<8; i++) 
         DELAY(0);
-    DATAL; DELAY(100); DATAH; DELAY(100); DATAL;
+    DATAL; DELAY(100); DATAH; DELAY(180); DATAL;
     for (i=0; i<16; i++) 
-        DELAY(195);
+        DELAY(190);
     uint8_t p = 0;
     uint8_t b = 1;
     for (i=0; i<17; i++) {
-        DATALOGIC(b);DELAY(201); DELAY(201);
-        DATALOGIC(b^1);DELAY(201); DELAY(200);
+        if (b) {
+            DATALOGIC(1);DELAY(151); DELAY(151);
+            DATALOGIC(0);DELAY(251); DELAY(250);
+        } else {
+            DATALOGIC(0);DELAY(251); DELAY(251);
+            DATALOGIC(1);DELAY(151); DELAY(150);
+        }
         b = (d & 1);
         p ^= b;
         d >>=1;
     }
-    DATALOGIC(p);DELAY(201); DELAY(201);
-    DATALOGIC(p^1);DELAY(201); DELAY(200);
+    if (p) {
+        DATALOGIC(1);DELAY(151); DELAY(151);
+        DATALOGIC(0);DELAY(251); DELAY(250);
+    } else {
+        DATALOGIC(0);DELAY(251); DELAY(251);
+        DATALOGIC(1);DELAY(151); DELAY(150);
+    }
     DATALOGIC(0);
     return;
 }
