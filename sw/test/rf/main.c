@@ -17,11 +17,10 @@ void main(void)
     
     while(1) {
         tx_word(x++);
-//        tx_word(x++);
-        for (uint8_t i=0; i<64; i++) {
-            _delay_loop_1(0);
-        }
-//        _delay_ms(400);
+//        for (uint8_t i=0; i<2; i++) {
+//            _delay_loop_1(0);
+//        }
+        _delay_ms(400);
     }
 }
 
@@ -44,22 +43,22 @@ void tx_word(uint16_t d)
     uint8_t b = 1;
     for (i=0; i<17; i++) {
         if (b) {
-            DATALOGIC(1);DELAY(151); DELAY(151);
-            DATALOGIC(0);DELAY(251); DELAY(250);
+            DATALOGIC(1);DELAY(150);
+            DATALOGIC(0);DELAY(249);
         } else {
-            DATALOGIC(0);DELAY(251); DELAY(251);
-            DATALOGIC(1);DELAY(151); DELAY(150);
+            DATALOGIC(0);DELAY(249);
+            DATALOGIC(1);DELAY(150);
         }
         b = (d & 1);
         p ^= b;
         d >>=1;
     }
     if (p) {
-        DATALOGIC(1);DELAY(151); DELAY(151);
-        DATALOGIC(0);DELAY(251); DELAY(250);
+        DATALOGIC(1);DELAY(150);
+        DATALOGIC(0);DELAY(249);
     } else {
-        DATALOGIC(0);DELAY(251); DELAY(251);
-        DATALOGIC(1);DELAY(151); DELAY(150);
+        DATALOGIC(0);DELAY(249);
+        DATALOGIC(1);DELAY(150);
     }
     DATALOGIC(0);
     return;
