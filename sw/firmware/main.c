@@ -67,6 +67,7 @@ int main(void)
         //score = score + is_active - (score_shifter >= 0x80);
         //score_shifter = (score_shifter<<1) | is_active;
         adcmin += 10;
+        if (!(msg.byte2 & 1)) adcmin+=2;
         asm (
             "cp   %2, %3" "\n\t"
             "brcc L_sc1 " "\n\t"
