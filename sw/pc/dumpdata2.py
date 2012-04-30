@@ -54,6 +54,8 @@ while 1:
     s = s % (timestamp, (d&0xFC00)>>10, (d&0x0300)>>8, (d&0xE)>>1, (d&0xF0)>>4, d&0x1)
     
     print s
+    with open('log/log-sensor.txt', 'a') as f:
+        f.write(s + '\n')
     #elaspedtime = time.time()-begintime
     #print "%d %d/%d" % (d, packetlost, (packetlost+packetrecv))
     #if (packetlost+packetrecv)==100:
