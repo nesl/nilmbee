@@ -11,6 +11,9 @@ uint8_t delay_count = 0;
 uint8_t rand_counter;
 uint8_t next_delay;
 
+#define DEBOUNCE_1 8
+#define DEBOUNCE_2 8
+
 void inline adc_init(void)
 {
     //PRR = 0;
@@ -43,7 +46,7 @@ int main(void)
 
     uint8_t i, dirty;
     uint8_t adcv, adcmax, adcmin;
-    uint8_t score = 0, score_shifter = 0;
+    uint8_t score = 16;
 
     pin_init();
     adc_init();
@@ -63,40 +66,27 @@ int main(void)
         }
         rand_counter += adcv ;
         
-        //is_active = (adcmax - adcmin > 3);
-        //score = score + is_active - (score_shifter >= 0x80);
-        //score_shifter = (score_shifter<<1) | is_active;
-        adcmin += 10;
-        i = (msg.byte2 & 1); // reuse i
-        if (!i) adcmin+=2;
-        asm (
-            "cp   %2, %3" "\n\t"
-            "brcc L_sc1 " "\n\t"
-            "inc  %0" "\n\t"
-"L_sc1:   " "rol  %1" "\n\t"
-            "brcc L_sc2 " "\n\t"
-            "dec  %0" "\n\t"
-"L_sc2:   " "" "\n\t"
-            "" "\n\t"
-            : "=r" (score), "=r" (score_shifter)
-            : "r" (adcmin), "r" (adcmax), "r" (score), "r" (score_shifter)
-        );
+        adcmax = adcmax - adcmin;
+        adcmin = 12;
+        i = (msg.byte2 & 1);
+        if (i) adcmin-=2;
         
+        score +=1;
+        if (adcmax<adcmin) score -=2;
+        if (score == 16-DEBOUNCE_1-1) score = 16-DEBOUNCE_1;
+        if (score == 16+DEBOUNCE_1+1) score = 16+DEBOUNCE_1;
+
         dirty = 0;
-        if (i) {
-            if (score <= 2) {
-                dirty = 1;
-                // emu: msg.is_active = 0;
-                // emu: msg.delay_pos = 0;
-                msg.byte2 = (msg.byte2 & 0xF0);
-            }
-        } else {
-            if (score >= 6) {
-                dirty = 1;
-                // emu: msg.is_active = 1;
-                // emu: msg.delay_pos = 0;
-                msg.byte2 = (msg.byte2 & 0xF0) | 0x1;
-            }
+        if (i && score <= 16-DEBOUNCE_1) {
+            dirty = 1;
+            // emu: msg.is_active = 0;
+            // emu: msg.delay_pos = 0;
+            msg.byte2 = (msg.byte2 & 0xF0);
+        } else if (!i && score >= 16+DEBOUNCE_1) {
+            dirty = 1;
+            // emu: msg.is_active = 1;
+            // emu: msg.delay_pos = 0;
+            msg.byte2 = (msg.byte2 & 0xF0) | 0x1;
         }
         if (dirty) {
             // emu: msg.delay_grp = 0;
