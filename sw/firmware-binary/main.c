@@ -61,13 +61,14 @@ int main(void)
             if (adcv > adcmax) adcmax = adcv;
             if (adcv < adcmin) adcmin = adcv;
         }
-        rand_counter ++ ;
+        rand_counter += adcv ;
         
         //is_active = (adcmax - adcmin > 3);
         //score = score + is_active - (score_shifter >= 0x80);
         //score_shifter = (score_shifter<<1) | is_active;
         adcmin += 10;
-        if (!(msg.byte2 & 1)) adcmin+=2;
+        i = (msg.byte2 & 1); // reuse i
+        if (!i) adcmin+=2;
         asm (
             "cp   %2, %3" "\n\t"
             "brcc L_sc1 " "\n\t"
@@ -82,17 +83,20 @@ int main(void)
         );
         
         dirty = 0;
-        if ((score <= 2) && (msg.byte2 & 1)) {
-            dirty = 1;
-            // emu: msg.is_active = 0;
-            // emu: msg.delay_pos = 0;
-            msg.byte2 = (msg.byte2 & 0xF0);
-        }
-        if ((score >= 6) && !(msg.byte2 & 1)) {
-            dirty = 1;
-            // emu: msg.is_active = 1;
-            // emu: msg.delay_pos = 0;
-            msg.byte2 = (msg.byte2 & 0xF0) | 0x1;
+        if (i) {
+            if (score <= 2) {
+                dirty = 1;
+                // emu: msg.is_active = 0;
+                // emu: msg.delay_pos = 0;
+                msg.byte2 = (msg.byte2 & 0xF0);
+            }
+        } else {
+            if (score >= 6) {
+                dirty = 1;
+                // emu: msg.is_active = 1;
+                // emu: msg.delay_pos = 0;
+                msg.byte2 = (msg.byte2 & 0xF0) | 0x1;
+            }
         }
         if (dirty) {
             // emu: msg.delay_grp = 0;
@@ -103,9 +107,10 @@ int main(void)
             msg.byte2 += 0x10;
             sei();
             
-            next_delay = 0xC0 | ((rand_counter & 0x0E) << 2);
+            i = (rand_counter & 0x0E);
+            next_delay = 0xC0 | (i << 2);
             msg.byte1 |= 0x3;
-            msg.byte2 |= (rand_counter & 0x0E);
+            msg.byte2 |= i;
             delay_count = 254;
         }
         //tx_word(adcmax - adcmin);
@@ -114,15 +119,17 @@ int main(void)
 
 ISR(PCINT0_vect)
 {
+    uint8_t i;
     if ((PINB & (1<<1)) && delay_count) {
         delay_count -= 2;
         if (delay_count == next_delay) {
             tx_word(msg);
             msg.byte2 += 0x10;
             next_delay = (delay_count & 0xC0) - 0x40; 
-            next_delay |= ((rand_counter & 0x0E) << 2);
+            i = (rand_counter & 0x0E);
+            next_delay |= (i << 2);
             msg.byte1 = (msg.byte1 & 0xFC) | (next_delay >> 6);
-            msg.byte2 = (msg.byte2 & 0xF1) | (rand_counter & 0x0E);
+            msg.byte2 = (msg.byte2 & 0xF1) | i;
             if (!next_delay) {
                 next_delay = 0x08;
                 msg.byte2 += 0x02;
