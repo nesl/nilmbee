@@ -9,6 +9,7 @@ $t2 = (int)$_REQUEST['t2'];
 $id = (int)$_REQUEST['id'];
 
 if (!$t2) $t2 = time();
+if (!$t1) $t1 = $t2 - 300;
 
 $sql = "select unix_timestamp(timestamp) as t, data as d from log where unix_timestamp(timestamp) > $t1 and unix_timestamp(timestamp) < $t2 and wattsup_id = $id";
 $res = mysql_query($sql);
