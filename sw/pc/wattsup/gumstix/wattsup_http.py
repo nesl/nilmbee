@@ -51,7 +51,7 @@ class WattsUpDevice(Thread):
             return 0
         if not (l[0]=='#' and l[-1]==';'):
             return 0
-        l = l[1:-2]
+        l = l[1:-1]
         data = l.split(',')
         if len(data) != 21:
             return 0
