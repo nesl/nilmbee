@@ -1,1 +1,29 @@
-\chapter{The network protocol}\label{chap4}
+\chapter{Radio packet format and retransmission scheme}\label{chap4}
+
+The sensors communicate with a base station with a unidirectional radio link. There is no receiver module in the sensors. They can not have any kind of acknowledgement of their transmission, nor can they do carrier detection. The system has no means to verify whether a packet has been delivered successfully. Therefore, we design a retransmission scheme in order to improve event deliver rate. 
+
+\section{Radio packet format and retransmission scheme}
+
+In our design, each packet has 16-bit of payload plus one parity bit. Each packet is 64 milliseconds long, which is slightly less than 4 AC cycles (assuming 60Hz). Hence, we choose 4 AC cycles as a time slot for transmission. 
+
+When a sensor detects an event, it transmits 5 packets in a timespan of 2.2 seconds. The event is successfully delivered when at least one packet is successfully received. In the rare case that another event detected on the same sensor before it finishes with the previous event, any further retransmissions of the previous event are abandoned. 
+
+The sensor can detect zero-crossing of AC voltage, and use that to provide a 60Hz timer synchronous to AC cycles. All packet transmissions are synchronized to AC cycles. 
+
+When an event is detected, the sensor initiated a transmission at the next AC cycle. Following the initial time slot, there are 31 more slots, arranged in 4 groups. The groups have 8, 8, 8 and 7 time slots respectively. Fig.\ref{fig:slots} shows the arrangement of transmission time slots. The sensor randomly pick one slot from each group. Altogether there are 32 time slots, or 128 cycles, roughly 2.2 seconds. 
+
+The format of each packet is shown in Fig.\ref{fig:packet}. The initial transmission of an event will have group number 0 and slot number 0. The group and slot number are included in the packet so that the receiver can estimate the delay from the event to the transmission. The 4-bit sequence number is advanced in every packet. The 6-bit device ID is hardcoded in every sensor node, allowing up to 64 sensors working in a same region with a single receiver. 
+
+\section{Evaluation of the radio network}
+
+\subsection{Poisson distribution events simulation}
+
+
+
+\subsection{Two-events collision test}
+
+\subsection{Poisson distribution events test}
+
+\subsection{Evaluation in real settings}
+
+
