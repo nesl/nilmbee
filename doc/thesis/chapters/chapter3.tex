@@ -20,6 +20,13 @@ The overall block diagram of the sensor hardware is shown in Fig.\ref{fig:hwover
   \label{fig:hwoverview}
 \end{figure}
 
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.6\textwidth]{figures/nilmbee2}
+  \caption{Photo of the sensor prototype}
+  \label{fig:sensor}
+\end{figure}
+
 \section{On-off state sensing}
 
 As discussed before, one of the function of the sensor is to detect binary (on-off) state changes. Typically, in order to get instantaneous power, both voltage and current need to be sampled, and they are multiplied and accumulated. The power calculation is usually done in a separate metering chip, or as a separate module integrated in a microcontroller. In our design, we choose to sample the current only, and detect state change solely based on the change of current. Although there is not enough information to obtain the actual power consumption from the current, our experiments show that it is enough to detect on-off events. In this way, the circuitry can be simpler without the voltage channel and the dedicated metering chip. 
@@ -27,6 +34,13 @@ As discussed before, one of the function of the sensor is to detect binary (on-o
 A $1m\Omega$ resistor in series captures the instantaneous current flow. The voltage drop across the resistor is amplified 100 times by two stages of amplifier. An ATTiny10 microcontroller then samples the signal at approximately 1.6kHz, and run the event detection algorithm. 
 
 The event detection algorithm run on the microcontroller is shown in fig \ref{fig:eventdetect}. Firstly, the range (i.e. $max - min$) of instantaneous current signal is taken for each 200-sample window. Note that the range is not necessarily the peak-peak amplitude of the signal, due to clippings discussed later. Nevertheless, the range do captures enough information for on-off state detection. Then, we take a threshold and get an instantaneous binary state for each window. Note that the threshold is adjusted slightly based on the state of the appliance, so that the binarization has some hysteresis. 
+
+\begin{figure}[htb]
+  \centering
+  \includegraphics[width=0.5\textwidth]{figures/eventdetect}
+  \caption{Event detection algorithm flowchart}
+  \label{fig:eventdetect}
+\end{figure}
 
 The threshold is hardcoded in the microcontroller firmware, and it is set to around 5W. Appliances with dry-contact switch, such as lamps and lights, draw absolutely zero power when turned off. Other appliances with soft-controlled switch, such as microwave and computer monitors, draw a very low standby power when turned off. Our experiments show that 5W is a reasonable threshold for most appliances. 
 

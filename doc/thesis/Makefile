@@ -9,12 +9,11 @@ thesis: figures
 	dvipdfmx thesismain
 
 %.eps: %.pdf
-	pdf2ps $< $*.ps
-	ps2eps -B -f $*.ps
+	pdftops -eps $< $*.eps
 
-figures: figures/hwoverview.eps
+figures: figures/hwoverview.eps figures/eventdetect.eps figures/slots.eps figures/packet.eps 
 
 clean:
 	rm -f *.aux *.lof *.lot *.toc *.log *.bbl *.blg
-	rm -f figures/hwoverview.eps
+	rm -f figures/hwoverview.eps figures/eventdetect.eps figures/slots.eps figures/packet.eps 
 
