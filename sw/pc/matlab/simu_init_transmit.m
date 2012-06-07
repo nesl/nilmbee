@@ -14,6 +14,7 @@ end
 if isempty(s)
     s.id = v.id;
     s.seq = 0;
+    s.pkt_delivery_rate = v.pkt_delivery_rate;
 end
 
 % insert new packet
@@ -37,10 +38,13 @@ simu_enqueue(time + PACKET_LENGTH, e, event_queue);
 
 % update next packet info
 s.event = v.event;
-s.grp = 3;
+s.grp = v.retrans_count - 1;
 s.slot = randi([0,7]);
+if s.grp==0 && s.slot==0
+    s.slot = 1;
+end
 s.next_delay = s.grp * 64 + s.slot * 8;
-s.delay_count = 254;
+s.delay_count = v.retrans_count * 64;
 s.busy_till = time + PACKET_LENGTH;
 
 sensor_state{v.id} = s;

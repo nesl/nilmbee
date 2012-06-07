@@ -1,4 +1,4 @@
-function [results, mismatch] = match_event_core( eventfile, logfile )
+function [results, mismatch] = match_event_core( eventfile, logfile, retrans_count )
 %MATCH_EVENT_CORE Compare received events with ground truth
 %   !!! Here we assume the first event is always delivered
 
@@ -13,12 +13,13 @@ for i=1:size(g,1)
 end
 g(1,4) = 0;
 
-[r,rawdata,wrongpkts,stat] = parse_event(logfile, sensors);
+[r,rawdata,wrongpkts,stat] = parse_event(logfile, sensors, retrans_count);
 recv_packets_num = size(rawdata, 1);
 total_packets = sum(stat(:,2));
 [~, i] = sort(r(:,1));
 r = r(i,:);
-r(:,1) = r(:,1)-r(1,1);
+%%removes time offset. not accurate...
+%r(:,1) = r(:,1)-r(1,1);
 
 j = 1;
 mismatch = 0;

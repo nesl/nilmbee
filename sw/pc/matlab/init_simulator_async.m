@@ -1,4 +1,4 @@
-function [ event_queue ] = init_simulator_4cyc( event_file, timebase, timeadj, retrans_count, pkt_delivery_rate )
+function [ event_queue ] = init_simulator_async( event_file, timebase, timeadj, retrans_count, pkt_delivery_rate )
 %INIT_SIMULATOR Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -16,8 +16,7 @@ for i=1:size(f,1)
     e.event = f(i,2);
     e.retrans_count = retrans_count;
     e.pkt_delivery_rate = pkt_delivery_rate;
-    t1 = ceil(t * 15)/15;
-    simu_enqueue(t1, e, event_queue);
+    simu_enqueue(t, e, event_queue);
     t = t + f(i,3) + timeadj;
 end
 

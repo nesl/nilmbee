@@ -14,6 +14,7 @@ end
 if isempty(s)
     s.id = v.id;
     s.seq = 0;
+    s.pkt_delivery_rate = v.pkt_delivery_rate;
 end
 
 % insert new packet
