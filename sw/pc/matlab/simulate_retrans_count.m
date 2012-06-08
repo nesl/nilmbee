@@ -70,8 +70,8 @@ for pkt_delivery_rate = [0.4 0.6 0.8 1]
     k = pkt_delivery_rate * 5 - 1;
 
     % Create figure
-    figure1 = figure;
-    figure2 = figure;
+    figure1 = figure('PaperPositionMode', 'auto', 'Position', [100 100 800 400]);
+    figure2 = figure('PaperPositionMode', 'auto', 'Position', [100 100 800 400]);
     % Create axes
     axes1 = axes('Parent',figure1,'YGrid','on','FontSize',12);
     hold(axes1,'all');

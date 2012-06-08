@@ -3,15 +3,17 @@ function evnt = poisson_event_gen( lambda, timelimit, eventlimit, moteid, filena
 %   Detailed explanation goes here
 
 evnt = zeros(0, 3);
-randcount = min(eventlimit, floor(timelimit * lambda * 1.1) + 100);
+randcount = length(moteid) * min(eventlimit, floor(timelimit * lambda * 1.1) + 100);
 randnumbers = exprnd(1/lambda, 1, randcount);
 j = 1;
 for id = moteid
     time = 0;
     s = 0;
-    while time < timelimit && j <= eventlimit
+    ecnt = 0;
+    while time < timelimit && ecnt < eventlimit
         time = time + randnumbers(j);
         j = j + 1;
+        ecnt = ecnt + 1;
         s = 1 - s;
         evnt = [evnt; id  s  time];
     end

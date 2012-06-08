@@ -1,4 +1,4 @@
-dataset_name = '20min';
+dataset_name = '250evt';
 eventfile_base = ['event-dataset/' dataset_name '/'];
 
 eventfiles = { ...
@@ -81,8 +81,8 @@ dim2 = 3; % async 1cyc 4cyc
 load(['simulation-result/slotting-' dataset_name '.mat'], 'pdr', 'edr');
 
 % Create figure
-figure1 = figure;
-figure2 = figure;
+figure1 = figure('PaperPositionMode', 'auto', 'Position', [100 100 700 400]);
+figure2 = figure('PaperPositionMode', 'auto', 'Position', [100 100 700 400]);
 % Create axes
 axes1 = axes('Parent',figure1,'YGrid','on','FontSize',12);
 hold(axes1,'all');
@@ -115,6 +115,7 @@ set(plot2(3),'MarkerSize',8,'Marker','x',...
 % Create label
 xlabel(axes1,'\mu (s)','FontSize',14);
 ylabel(axes1,'Event delivery ratio','FontSize',14);
+ylim(axes1, [0.84 1]);
 
 xlabel(axes2,'\mu (s)','FontSize',14);
 ylabel(axes2,'Packet delivery ratio','FontSize',14);
