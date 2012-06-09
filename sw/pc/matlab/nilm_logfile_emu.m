@@ -1,4 +1,4 @@
-path='panel-0528';
+path='panel-0607';
 %log_watts = load_wattsup('log/log-wattsup.2.txt');
 log_watts = load_panel(path);
 %log_sensor = load('log/log-sensor.2.txt');
@@ -16,7 +16,7 @@ ax_main = gca;
 options = struct( ...
     'delay', 8, ...
     'window', 2, ...
-    'sensors', [1:3 6 8 11:14 18 19 21 22] ... % [0:9 11:22] ... %
+    'sensors', [0:9 11:19 21 22] ... %[1:3 6 8 11:14 18 19 21 22] ... % 
     );
 
 pnt_w = 1;

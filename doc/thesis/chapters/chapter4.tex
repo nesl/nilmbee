@@ -52,13 +52,13 @@ Firstly, we evaluate the effect of having multiple retransmissions for each even
     \centering
     \begin{subfigure}[t]{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-edr-20min-pdr0.4.eps}
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-edr-250evt-pdr0.4.eps}
         \caption{}
     \end{subfigure} 
     \\
     \begin{subfigure}[t]{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-pdr-20min-pdr0.4.eps}
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-pdr-250evt-pdr0.4.eps}
         \caption{}
     \end{subfigure}
     \caption[EDR and PDR with different transmission redundancy, $PDR_0 = 0.4$]{Simulation results showing EDR(a) and PDR(b) with different number of retransmissions per event, at $PDR_0 = 0.4$}\label{fig:retrans-lambda-0.4}
@@ -69,13 +69,13 @@ Firstly, we evaluate the effect of having multiple retransmissions for each even
     \centering
     \begin{subfigure}[t]{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-edr-20min-pdr0.6.eps}
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-edr-250evt-pdr0.6.eps}
         \caption{}
     \end{subfigure} 
     \\
     \begin{subfigure}[t]{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-pdr-20min-pdr0.6.eps}
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-pdr-250evt-pdr0.6.eps}
         \caption{}
     \end{subfigure}
     \caption[EDR and PDR with different transmission redundancy, $PDR_0 = 0.6$]{Simulation results showing EDR(a) and PDR(b) with different number of retransmissions per event, at $PDR_0 = 0.6$}\label{fig:retrans-lambda-0.6}
@@ -86,13 +86,13 @@ Firstly, we evaluate the effect of having multiple retransmissions for each even
     \centering
     \begin{subfigure}[t]{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-edr-20min-pdr0.8.eps}
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-edr-250evt-pdr0.8.eps}
         \caption{}
     \end{subfigure} 
     \\
     \begin{subfigure}[t]{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-pdr-20min-pdr0.8.eps}
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-pdr-250evt-pdr0.8.eps}
         \caption{}
     \end{subfigure}
     \caption[EDR and PDR with different transmission redundancy, $PDR_0 = 0.8$]{Simulation results showing EDR(a) and PDR(b) with different number of retransmissions per event, at $PDR_0 = 0.8$}\label{fig:retrans-lambda-0.8}
@@ -103,13 +103,13 @@ Firstly, we evaluate the effect of having multiple retransmissions for each even
     \centering
     \begin{subfigure}[t]{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-edr-20min-pdr1.eps}
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-edr-250evt-pdr1.eps}
         \caption{}
     \end{subfigure} 
     \\
     \begin{subfigure}[t]{0.9\textwidth}
         \centering
-        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-pdr-20min-pdr1.eps}
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/simulation-result/retrans-count-pdr-250evt-pdr1.eps}
         \caption{}
     \end{subfigure}
     \caption[EDR and PDR with different transmission redundancy, $PDR_0 = 1$]{Simulation results showing EDR(a) and PDR(b) with different number of retransmissions per event, at $PDR_0 = 1$}\label{fig:retrans-lambda-1}
@@ -137,7 +137,7 @@ The result in Fig.\ref{fig:edr-pdr-slotting} shows that synchronizing packets to
     \caption[EDR and PDR with different timeslot alignment]{Simulation results showing EDR(a) and PDR(b) with different timeslot alignment}\label{fig:edr-pdr-slotting}
 \end{figure}
 
-\subsection{Controlled experiments: Two-events collision test and Poisson distribution events}
+\subsection{Two-events collision test and Poisson distribution events}
 
 We setup a small scale testbed so that we can test real hardware with programmatically controllable events through an extra microcontroller which is connected to a computer. The extra microcontroller, which is an mbed\footnote{http://mbed.org/}, is connected to each sensor with a wire. It toggles the wire to indicate events. The mbed is also connected to the computer with a USB emulated serial port. Therefore, a perl script running on the computer can issue events to the sensors via the mbed. 
 
@@ -163,7 +163,7 @@ In this test, we generate collided events with fixed interval, two events at a t
 
 Secondly, we use some poisson distribution datasets on the testbed. The datasets are synthesized in the same way as described in the previous section, with $N = 6$, $\mu$ varies from 3 to 20. We limit the length of each dataset to be 300 seconds long. Fig.\ref{fig:poisson-5min} shows the average EDR and PDR, as well as the EDR of separate sensors. We can see that as the event density increases, some sensors are much worse than the others. This is because the transmission power differs among the sensors. The receiver has an automatic gain control (AGC) to tune the receiving signal strength. However, the AGC needs time to settle. When the transmission are too busy, the AGC can not accommodate all sensors. If the events are sparse with longer $\mu$, all sensor nodes have near perfect EDR. Again, even the case with $\mu=20$ is much more denser than a real setting. Appliances are very unlikely to be turned on and off within 20 seconds. 
 
-\subsection{Evaluation in real settings}
+\subsection{Evaluation in a real setting}
 
 In this section, we provide the statistics of the sensor network with a dataset collected in a real setting. We have 21 sensors deployed in our lab, named \#1 through \#22, and \#10 is not deployed. \#16 is deployed, but there is no event during the time window of this dataset. Details about the deployment are discussed in Chapter \ref{chap5}.
 
@@ -191,7 +191,7 @@ The dataset we used for the statistics contains data collected in 18 days. Note 
   7&     20364    &   21818   &     4534    &    4569\\
   8&       290    &     304   &       69    &      69\\
   9&       307    &     312   &       81    &      81\\
-  10&         0   &        0  &         0   &        0\\
+%  10&         0   &        0  &         0   &        0\\
   11&       354   &      373   &       81    &      81\\
   12&       216   &      217  &        54    &      54\\
   13&       438   &      440  &        88    &      88\\

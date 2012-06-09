@@ -19,7 +19,7 @@ total_packets = sum(stat(:,2));
 [~, i] = sort(r(:,1));
 r = r(i,:);
 %%removes time offset. not accurate...
-r(:,1) = r(:,1)-r(1,1);
+%r(:,1) = r(:,1)-r(1,1);
 
 j = 1;
 mismatch = 0;

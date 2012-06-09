@@ -1,4 +1,4 @@
-dataset_name = '20min';
+dataset_name = '250evt';
 eventfile_base = ['event-dataset/' dataset_name '/'];
 
 eventfiles = { ...

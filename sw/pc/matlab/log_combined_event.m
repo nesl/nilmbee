@@ -52,6 +52,7 @@ if length(parsed_events_ids)<2
 else
     combined_events{end+1}.delta_watts = dpower;
     combined_events{end}.recvevents = parsed_events;
+    combined_events{end}.recvevents_ids = parsed_events_ids;
     new_id = length(combined_events);
 end
 

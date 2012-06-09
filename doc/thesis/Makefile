@@ -1,3 +1,9 @@
+FIGURES = figures/hwoverview.eps \
+          figures/eventdetect.eps \
+          figures/slots.eps \
+          figures/packet.eps \
+          figures/algooverview.eps \
+          figures/pwc.eps
 
 all: thesis
 
@@ -11,9 +17,10 @@ thesis: figures
 %.eps: %.pdf
 	pdftops -eps $< $*.eps
 
-figures: figures/hwoverview.eps figures/eventdetect.eps figures/slots.eps figures/packet.eps 
+figures: $(FIGURES)
 
 clean:
 	rm -f *.aux *.lof *.lot *.toc *.log *.bbl *.blg
-	rm -f figures/hwoverview.eps figures/eventdetect.eps figures/slots.eps figures/packet.eps 
-
+	rm -f $(FIGURES)
+	
+	

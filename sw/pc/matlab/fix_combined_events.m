@@ -16,6 +16,15 @@ end
 
 for i=1:length(combined_events)
     s = 0;
+    recvids = '';
+    for j=1:length(combined_events{i}.recvevents_ids)
+        if combined_events{i}.recvevents(j).event
+            recvids = [recvids ' +' num2str(combined_events{i}.recvevents(j).id)];
+        else
+            recvids = [recvids ' -' num2str(combined_events{i}.recvevents(j).id)];
+        end
+        recvids = [recvids '(' num2str(combined_events{i}.recvevents_ids(j)) ')'];
+    end
     for j=1:length(combined_events{i}.recvevents)
         if combined_events{i}.recvevents(j).event ==1
             s = s + normwatts(combined_events{i}.recvevents(j).id);
@@ -24,14 +33,14 @@ for i=1:length(combined_events)
         end
     end
     if isnan(s)
-        disp(['Cannot resolve combined event ' num2str(i) ', no enough data.']);
+        disp(['Cannot resolve combined event ' num2str(i) ', no enough data. IDS=' recvids]);
         continue;
     end
     if s * combined_events{i}.delta_watts < 0
-        disp(['Cannot resolve combined event ' num2str(i) ', wrong sign.']);
+        disp(['Cannot resolve combined event ' num2str(i) ', wrong sign. IDS=' recvids]);
         continue;
     end
-    disp(['Resolving combined event ' num2str(i) ' real delta: ' num2str(combined_events{i}.delta_watts) ' estm delta: ' num2str(s)]);
+    disp(['Resolving combined event ' num2str(i) ' real delta: ' num2str(combined_events{i}.delta_watts) ' estm delta: ' num2str(s) ' IDS=' recvids]);
     r = combined_events{i}.delta_watts / s;
     for j=1:length(combined_events{i}.recvevents)
         t = disagg_map(combined_events{i}.recvevents(j).id);
