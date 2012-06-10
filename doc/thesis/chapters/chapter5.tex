@@ -10,7 +10,7 @@ There are some challenges to do so. Firstly, there is usually slight variation i
 
 Secondly, power changes observed at the central meter may not be synchronous with the events. The time difference may be several seconds. Especially when multiple events happens close in time, the power trace goes as a slope, instead of having sharp steps. 
 
-To overcome these problems, we run piecewise constant (PWC) denoising algorithm on the central power trace first. It estimates the original signal with a piecewise constant signal which only have a small number of step changes. This process can remove the noises and detect step changes. The algorithm is discussed in the next section in detail. We can not use a lowpass filter, because the high frequency noises are in the same frequency range as the step changes. After PWC denoising, we can match the step changes with the events, according to their timestamp. If the event is single and clear, we now have its associated power number. However, if multiple events happens close to each other, they are considered overlapping, and further disaggregation is needed to get the power number for each individual event. The block diagram of the energy disaggregation algorithm is shown in Fig./ref{fig:algooverview}. 
+To overcome these problems, we run piecewise constant (PWC) denoising algorithm on the central power trace first. It estimates the original signal with a piecewise constant signal which only have a small number of step changes. This process can remove the noises and detect step changes. The algorithm is discussed in the next section in detail. We can not use a lowpass filter, because the high frequency noises are in the same frequency range as the step changes. After PWC denoising, we can match the step changes with the events, according to their timestamp. If the event is single and clear, we now have its associated power number. However, if multiple events happens close to each other, they are considered overlapping, and further disaggregation is needed to get the power number for each individual event. The block diagram of the energy disaggregation algorithm is shown in Fig.\ref{fig:algooverview}. 
 
 \begin{figure}[htb]
   \centering
@@ -19,7 +19,7 @@ To overcome these problems, we run piecewise constant (PWC) denoising algorithm 
   \label{fig:algooverview}
 \end{figure}
 
-\section{PWC denoising and step detection in the central power trace}
+\subsection{PWC denoising and step detection in the central power trace}
 
 In our experiments, we found that it is important to have a robust PWC denoising algorithm, especially when the number of appliance scales up and the interested appliances consumes only tens or a hundred watts. The problem is not particularly significant in previous research, because previously, people mostly focus on few appliances with very large power consumption, such as dish washers, heaters or ovens. A low pass filter is not suitable in this case because the noises have the same frequency as the step changes that we want to preserve. 
 
@@ -40,8 +40,165 @@ The parameter $\gamma$ acts as a threshold in the algorithm, or 'penalty' to ins
 
 We also limit the length of signal buffer to $L_{max}$, so that the greedy search domain is limited to the last $L_{max}$ samples. Otherwise, the buffer can grow indefinitely when there is no step-change in a very long time. 
 
+\subsection{Overlapping events disaggregation}
 
+When multiple events happen close enough, only the aggregated effect will shown on the power readings at the central meter. In this case, we use the historical data to estimate the power changes. To be specific, we use the median value of all power changes that we observed before on non-overlapping events of a particular appliance. This works under the assumption that all appliances have binary on-off states.
 
 \section{Experimental results}
 
+We deployed an experimental setup in our lab, which is a mixed office and lab setting. All the interested appliances are arranged on 4 branch circuits, in order to minimize the interference from other appliances. The lab has 20 branch circuits in total, which is monitored by a Veris E30A panel energy meter\footnote{http://www.veris.com/}. We collect data from the meter at an interval of 2 seconds, and use the sum of power reading on the 4 branch circuits as the aggregated power reading.
+
+We have 20 sensor nodes deployed, including 9 LCD monitors, 8 laptop computers, a solder station, a workbench light and a water dispenser. Most appliances are binary-state, except the water dispenser, which has both cooler and heater, and they work independently like two separate appliances. 
+
+There are 11 appliances that we have instrumented with \textit{Watts up? PRO} meters. These meters captures the power consumption of individual appliances and log the data on a server through Gumstix nodes. These data serve as the ground truth. They are not used in any way in the energy disaggregation and inferencing process. 
+
+\subsection{Step detection results}
+
+Fig.\ref{fig:pwc-example} shows some signal snippets with their PWC denoising and step detection results. The high power device showing in the figure is the water dispenser heater. Except that, other power steps are mostly tens of watts. And there is a oscillating power variation in the power signal due to some laptop computers. The PWC denoising algorithm can detect steps in the same order of magnitude as the variation. 
+
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/pwc-result/1.eps}
+        \caption{}
+    \end{subfigure} 
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/pwc-result/2.eps}
+        \caption{}
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/pwc-result/3.eps}
+        \caption{}
+    \end{subfigure} 
+    \begin{subfigure}[t]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/pwc-result/4.eps}
+        \caption{}
+    \end{subfigure} 
+    \caption{Signal snippets showing PWC denoising results}\label{fig:pwc-example}
+\end{figure}
+
+\subsection{Appliance state detection accuracy}
+
+We use the state change events that the sensors detected to reconstruct the state of each individual appliances over time. We also threshold the ground truth consumption of some individual appliances to obtain the ground truth of state. By comparing appliance states collected by our sensors with the ground truth, we show the accuracy of our system. We measure accuracy by precision and recall, defined as following:
+\[
+\text{Precision} = \frac{tp}{tp+fp} = 
+\frac{\text{Time appliance is on and reported on}}
+{\text{Time appliance is reported on}}
+\]
+\[
+\text{Recall} = \frac{tp}{tp+fn} = 
+\frac{\text{Time appliance is on and reported on}}
+{\text{Time appliance is on}}
+\]
+
+\begin{table}
+  \centering
+  \begin{tabular}{lccccc}
+  \hline
+  ID & On (s) & Reported on (s) & On\&reported on (s) & Precision (\%) & Recall (\%) \\
+  \hline
+﻿1  & 24659  & 24586  & 24577   &99.965 &99.667 \\
+2  & 24657  & 24586  & 24571   &99.937 &99.651 \\
+3  & 19125  & 19131  & 19117   &99.925 &99.958 \\
+5  & 136328 & 135248 & 135214  &99.975 &99.183 \\
+8  & 19477  & 19477  & 19461   &99.920 &99.918 \\
+12 & 128745 & 128198 & 128173  &99.981 &99.556 \\
+13 & 106761 & 106200 & 106151  &99.954 &99.429 \\
+14 & 764    & 763.7  & 762     &99.773 &99.738 \\
+17 & 75308  & 75471  & 75296   &99.768 &99.984 \\
+18 & 218431 & 217935 & 217771  &99.925 &99.698 \\
+21 & 34720  & 34708  & 34642   &99.810  &99.775 \\
+  \hline
+  \end{tabular}
+  \caption{Appliance state detection accuracy}
+  \label{tab:pre-recall}
+\end{table}
+
+
+\begin{figure}[p]
+    \centering
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-1.eps}
+        \caption{\#1 Monitor}
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-2.eps}
+        \caption{\#2 Monitor}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-3.eps}
+        \caption{\#3 Laptop}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-5.eps}
+        \caption{\#5 Laptop}
+    \end{subfigure}
+    \caption{Appliance state reported vs. truth (\#1,2,3,5)}\label{fig:state-1-2-3-5}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-8.eps}
+        \caption{\#8 Monitor}
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-12.eps}
+        \caption{\#12 Laptop}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-13.eps}
+        \caption{\#13 Monitor}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-14.eps}
+        \caption{\#14 Laptop}
+    \end{subfigure}
+    \caption{Appliance state reported vs. truth (\#8,12,13,14)}\label{fig:state-8-12-13-14}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-17.eps}
+        \caption{\#17 Monitor}
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-18.eps}
+        \caption{\#18 Monitor}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/state-21.eps}
+        \caption{\#21 Monitor}
+    \end{subfigure}
+    \caption{Appliance state reported vs. truth (\#17,18,21)}\label{fig:state-17-18-21}
+\end{figure}
+
+
+\subsection{Energy consumption of individual appliances}
 
