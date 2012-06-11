@@ -23,7 +23,7 @@ while revt_pnt <= length(recvevents)
 %    end
 %    [combined_events, cid, parsed_revts] = log_combined_event(recvevents(revt_pnt:(tmp-1)), dpower, combined_events);
     [combined_events, cid, parsed_revts, revt_pnt_new, dpower, w] = log_combined_event(recvevents, wattsevents, revt_pnt, combined_events);
-    if length(parsed_revts) > 1
+    if cid
         disp(['Combined recvevents: ' num2str(revt_pnt) '-' num2str(revt_pnt_new-1)]);
         for i = 1:length(parsed_revts)
             if parsed_revts(i).event == 0
@@ -51,5 +51,5 @@ while revt_pnt <= length(recvevents)
     revt_pnt = revt_pnt_new;
 end
 
-disagg_events = fix_combined_events( disagg_events, combined_events );
+disagg_events = fix_combined_events_hisonly( disagg_events, combined_events );
 

@@ -47,7 +47,8 @@ for i = w'
     dpower = dpower + wattsevents(i).delta_watts;
 end
 
-if length(parsed_events_ids)<2
+%if length(parsed_events_ids)<2
+if isempty(parsed_events_ids) || (length(parsed_events_ids)==1 && abs(dpower)>0.005 && (dpower * (parsed_events(1).event-0.5) > 0) && (abs(dpower)<0.4 || parsed_events(1).id==7))
     new_id = 0;
 else
     combined_events{end+1}.delta_watts = dpower;

@@ -52,6 +52,8 @@ We have 20 sensor nodes deployed, including 9 LCD monitors, 8 laptop computers, 
 
 There are 11 appliances that we have instrumented with \textit{Watts up? PRO} meters. These meters captures the power consumption of individual appliances and log the data on a server through Gumstix nodes. These data serve as the ground truth. They are not used in any way in the energy disaggregation and inferencing process. 
 
+The dataset used in this section is a 7-day long dataset collected from June 1st-7th, 2012. 
+
 \subsection{Step detection results}
 
 Fig.\ref{fig:pwc-example} shows some signal snippets with their PWC denoising and step detection results. The high power device showing in the figure is the water dispenser heater. Except that, other power steps are mostly tens of watts. And there is a oscillating power variation in the power signal due to some laptop computers. The PWC denoising algorithm can detect steps in the same order of magnitude as the variation. 
@@ -97,6 +99,8 @@ We use the state change events that the sensors detected to reconstruct the stat
 {\text{Time appliance is on}}
 \]
 
+Table \ref{tab:pre-recall} shows the statistics of appliances with power ground truth. Here, an appliance is considered in on state when its power consumption is greater than 5W. The table shows power-on time, reported-on time, reported-on-and-indeed-on time, along with precision and recall. Fig.\ref{fig:state-1-2-3-5}-\ref{fig:state-17-18-21} shows the power consumption over time of the appliances. The solid traces are power ground truth of each individual appliance. Shaded area shows the period when our sensors report power-on. We can tell from the data that our system can provide very reliable and accurate appliance state data.
+
 \begin{table}
   \centering
   \begin{tabular}{lccccc}
@@ -113,7 +117,7 @@ We use the state change events that the sensors detected to reconstruct the stat
 14 & 764    & 763.7  & 762     &99.773 &99.738 \\
 17 & 75308  & 75471  & 75296   &99.768 &99.984 \\
 18 & 218431 & 217935 & 217771  &99.925 &99.698 \\
-21 & 34720  & 34708  & 34642   &99.810  &99.775 \\
+21 & 34720  & 34708  & 34642   &99.810 &99.775 \\
   \hline
   \end{tabular}
   \caption{Appliance state detection accuracy}
@@ -202,3 +206,112 @@ We use the state change events that the sensors detected to reconstruct the stat
 
 \subsection{Energy consumption of individual appliances}
 
+Once we have reliable appliance power states and the step changes in the aggregated power, we can estimate the power traces of each individual appliance, according to the algorithm proposed previously. 
+
+Table \ref{tab:disagg} shows the energy consumption estimation of the appliances. For those appliances instrumented with ground truth power readings, we show both the true energy consumption over the 7-day period of the dataset, and the estimated energy consumption. For those appliances without ground truth power readings, only the estimation is shown. In the experiments, we found that appliance \#1 and \#2, which are two monitors, are working in complete synchrony. Theoretically, there is no way to distinguish the power consumption of them other than direct metering them separately. Hence, we regard them as a combined single appliance. 
+
+The estimation error shows big difference among different appliances. For most appliances, the error is less than 30\%. However, for monitors \#1+2, laptop \#3 and laptop \#5, the error is large. Generally, LCD monitors, which have stable on-state power, have more accurate results, while energy estimation for laptops are less accurate. This is because the power of a on-state laptop can vary as much as 1/3 over time, due to different load, battery status, etc. Other causes of inaccuracy include lack of state changes. Some appliances are kept on or off for a long time, and there are only few state changes. In this case, the errors in the step detection will keep accumulating. Monitors \#1+2 and laptop \#3 all fall in this case. They have just 3-5 state changes during the period of the dataset. 
+
+Fig.\ref{fig:power-1-2-3-5-8}-\ref{fig:power-18-21} displays some snippets of estimated power vs ground truth for several appliances. 
+
+\begin{table}
+  \centering
+  \begin{tabular}{lccccr}
+  \hline
+  ID & Power-on time (h) & Avg. power (W) & Energy (Wh) & Est. energy (Wh) & Error (\%) \\
+  \hline
+﻿1+2& 6.85  & 47.9  & 327.9   &  163.0   &  -50.3 \\
+3  & 5.31  & 29.9  & 158.9   &  233.8   &  +47.1 \\
+5  & 37.87 & 38.6  & 1461.4  & 2279.1   & +56.0 \\
+8  & 5.41  & 44.9  & 242.9   & 199.0    & -18.1 \\
+12 & 35.76 & 36.9  & 1319.1  & 1639.1   & +24.3 \\
+13 & 29.66 & 36.2  & 1072.1  & 1241.7   & +15.8 \\
+14 & 0.21  & 63.1  & 13.4    & 9.60     & -28.3 \\
+17 & 20.92 & 45.9  & 961.0   & 667.8    & -30.8 \\
+18 & 60.68 & 31.1  & 1885.2  & 1718.3   & -8.9 \\
+21 & 9.64  & 26.9  & 259.8   & 290.2    & +11.7 \\
+  \hline
+4 & 64730  & -  & -   & 537.7    & - \\
+7 & 259984  & -  & -   & ﻿17216    & - \\
+9 & 521012  & -  & -   & 5697.8    & - \\
+11 & 61032  & -  & -   & 829.0    & - \\
+15 & 3852  & -  & -   & 47.9    & - \\
+19 & 55160  & -  & -   & 324.7    & - \\
+22 & 59216  & -  & -   & 640.6    & - \\
+  \hline    
+  \end{tabular}
+  \caption{Energy consumption estimation of individual appliances}
+  \label{tab:disagg}
+\end{table}
+
+\begin{figure}[p]
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-1-2.eps}
+        \caption{\#1+2 Monitors}
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-3.eps}
+        \caption{\#3 Laptop}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-5.eps}
+        \caption{\#5 Laptop}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-8.eps}
+        \caption{\#8 Monitor}
+    \end{subfigure}
+    \caption{Appliance power consumption estimation vs. truth (\#1+2,3,5,8)}\label{fig:power-1-2-3-5-8}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-12.eps}
+        \caption{\#12 Laptop}
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-13.eps}
+        \caption{\#13 Monitor}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-14.eps}
+        \caption{\#14 Laptop}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-17.eps}
+        \caption{\#17 Monitor}
+    \end{subfigure}
+    \caption{Appliance power consumption estimation vs. truth (\#12,13,14,17)}\label{fig:power-12-13-14-17}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-18.eps}
+        \caption{\#18 Monitor}
+    \end{subfigure} 
+    \\
+    \begin{subfigure}[t]{\textwidth}
+        \centering
+        \includegraphics[width=\textwidth] {../../sw/pc/matlab/disagg-result/power-21.eps}
+        \caption{\#21 Monitor}
+    \end{subfigure}
+    \caption{Appliance power consumption estimation vs. truth (\#18,21)}\label{fig:power-18-21}
+\end{figure}

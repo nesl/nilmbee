@@ -1,1 +1,12 @@
-\appendix \chapter{Radio coding scheme}\label{app1}
+\appendix \chapter{315MHz radio coding scheme}\label{app1}
+
+We use a very simple ASK transmitter and receiver. The transmitter module only provides a digital input pin which controls whether it transmits (1) or not (0). And the receiver has one digital output pin.
+ 
+There are two things about the receiver we need to take care of when we design the encoding and decoding software. 1) When no transmitter is transmitting, or when a transmitter is transmitting continuously on, either way the receiver will output a random stream of bits instead of steady 0. This is due to the auto gain control (AGC) on the receiver trying to adapt to the current background signal strength. Moreover, when a transmitter begins transmitting, the AGC takes time to adapt, hence the output of the beginning period is more noisy than afterward. 2) When the signal strength is not good enough, the output stream will contain lots of spikes. Thus, we can not reliably decode the message by looking at transition edges or by sampling the signal only once. 
+
+Each packet is 16-bit long in our design. The packet begins with 7ms of 1, which serves to stabilize the receiver. Then follows a preamble, for synchronization purpose. The preamble consists of two positive edges that are precisely 4 bits apart in time. The receiver use these two edges to determine the length of each bit. And following that, 16 data bits are transmitted using Manchester code, where 1 is represented with 1-0 transition, and 0 is represented with 0-1 transition. Note that the second edge of the preamble is actually the beginning of a dummy bit 1 transmitted with Manchester code. Finally, a parity bit is transmitted following the data bits. 
+
+The length of each bit is 2.5ms. Each packet is approximately 62ms. The length is less than 4 AC cycles, which is 66.7ms. Hence, we choose 4 AC cycles as a transmission timeslot. 
+
+
+

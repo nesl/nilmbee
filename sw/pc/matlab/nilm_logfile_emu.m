@@ -16,7 +16,7 @@ ax_main = gca;
 options = struct( ...
     'delay', 8, ...
     'window', 2, ...
-    'sensors', [0:9 11:19 21 22] ... %[1:3 6 8 11:14 18 19 21 22] ... % 
+    'sensors', [2:9 11:19 21 22] ... %[1:3 6 8 11:14 18 19 21 22] ... % 
     );
 
 pnt_w = 1;
@@ -47,13 +47,13 @@ while pnt_w <= size(log_watts,1) || pnt_s <= size(log_sensor,1)
             %assoc_event_n = 0;
             wattsid = length(wattsevents);
             for i=1:length(recvevents)
-                if abs(step(1)-recvevents(i).timestamp) < min([4 recvevents(i).watts_event(2)])
+                if abs(step(1)-recvevents(i).timestamp) < min([7 recvevents(i).watts_event(2)])
                     recvevents(i).watts_event = [wattsid abs(step(1)-recvevents(i).timestamp)];
                     % we do one-way (recv->watts) reference for now
                     %wattsevents(wattsid).recv_event(end+1) = i;
                     %assoc_event_n = assoc_event_n + 1;
                 end
-                if abs(step(1)-recvevents(i).timestamp) < 4
+                if abs(step(1)-recvevents(i).timestamp) < 7
                     recvevents(i).watts_events(end+1,:) = [wattsid abs(step(1)-recvevents(i).timestamp)];
                 end
             end
