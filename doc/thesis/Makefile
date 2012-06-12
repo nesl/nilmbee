@@ -12,7 +12,7 @@ thesis: figures
 	bibtex thesismain
 	latex thesismain
 	latex thesismain
-	dvipdfmx thesismain
+	dvipdfmx -o MS-thesis-Tianji.pdf thesismain
 
 %.eps: %.pdf
 	pdftops -eps $< $*.eps
