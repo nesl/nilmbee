@@ -1,16 +1,16 @@
 \chapter{Energy disaggregation assisted by appliance state sensing}\label{chap5}
 
-In this chapter, we propose an energy disaggregation algorithm. It uses the appliance state sensor network to determine states of appliances, and uses a central energy meter to get power numbers in Watts. 
+In this chapter, we propose an energy disaggregation algorithm. It uses our appliance state sensing system to determine states of appliances, and uses a central energy meter to provide power numbers in Watts. 
 
 \section{Energy disaggregation algorithm}
 
-The sensors can tell when and which appliance power state is changed. However, it has no capability of providing power consumption numbers. With the knowledge of the total power consumption trace, we are able to associate each appliance power state change (event) with the change in total consumption, so that we are able to infer the consumption of that particular appliance, assuming its consumption is stable. 
+The sensors can tell when and which appliance power state has changed. However, it has no capability to provide power consumption numbers. With the knowledge of the aggregated power consumption, we are able to associate events with the changes in total consumption, so that we are able to infer the consumption of that particular appliance, assuming its consumption is stable when it is powered on. 
 
-There are some challenges to do so. Firstly, there is usually slight variation in the power that an appliance takes. Some appliances have stable power traces, such as lights, others may have large variations in the power traces. We see 5W-10W variation in the power traces of laptops when browsing web pages. When there are a number of appliances, the variation adds up at the central meter, so that we usually see a very noisy power trace. Most of the appliances we use consumes tens of watts, and the variation is sometimes at the same order of magnitude. Therefore, it is hard to get the accurate power change due to an event.
+There are some challenges to do so. Firstly, there is usually slight variation in the power that an appliance takes over time. Some appliances have stable power traces, such as lights, others may have large variations in their power traces. We see 5W-10W variation in the power traces of laptops when simply browsing web pages. When there are a number of appliances, the variation adds up at the central meter, so that we usually see a very noisy power trace. Most of the appliances in our experiments consume tens of watts, and the variation is sometimes at the same order of magnitude. Therefore, even knowing there is an event happening, it is hard to tell the accurate power step change. We can not use a lowpass filter, because the high frequency noises are in the same frequency range as the step changes. 
 
-Secondly, power changes observed at the central meter may not be synchronous with the events. The time difference may be several seconds. Especially when multiple events happens close in time, the power trace goes as a slope, instead of having sharp steps. 
+Secondly, power changes observed at the central meter may not be synchronous with the events. The time difference can be as long as several seconds. In the case when multiple events happens close in time, the power trace goes as a slope, instead of having sharp steps. 
 
-To overcome these problems, we run piecewise constant (PWC) denoising algorithm on the central power trace first. It estimates the original signal with a piecewise constant signal which only have a small number of step changes. This process can remove the noises and detect step changes. The algorithm is discussed in the next section in detail. We can not use a lowpass filter, because the high frequency noises are in the same frequency range as the step changes. After PWC denoising, we can match the step changes with the events, according to their timestamp. If the event is single and clear, we now have its associated power number. However, if multiple events happens close to each other, they are considered overlapping, and further disaggregation is needed to get the power number for each individual event. The block diagram of the energy disaggregation algorithm is shown in Fig.\ref{fig:algooverview}. 
+To overcome these problems, we run piecewise constant (PWC) denoising algorithm on the central power trace first. It estimates the original signal with a piecewise constant signal which only have a small number of step changes, removing the noise. The algorithm is discussed in the next section in detail. After PWC denoising, we match the step changes with the events, according to their timestamp. If an event is clear without overlapping with other events, we will have its associated power number. However, if multiple events happens close to each other, i.e they are overlapping, then further disaggregation is needed to get the power number for each individual event. The block diagram of the energy disaggregation algorithm is shown in Fig.\ref{fig:algooverview}. 
 
 \begin{figure}[htb]
   \centering
@@ -19,15 +19,16 @@ To overcome these problems, we run piecewise constant (PWC) denoising algorithm 
   \label{fig:algooverview}
 \end{figure}
 
-\subsection{PWC denoising and step detection in the central power trace}
+\subsection{PWC denoising and step detection with the central power trace}
 
-In our experiments, we found that it is important to have a robust PWC denoising algorithm, especially when the number of appliance scales up and the interested appliances consumes only tens or a hundred watts. The problem is not particularly significant in previous research, because previously, people mostly focus on few appliances with very large power consumption, such as dish washers, heaters or ovens. A low pass filter is not suitable in this case because the noises have the same frequency as the step changes that we want to preserve. 
+In our experiments, we found that it is important to have a robust PWC denoising algorithm, especially when the number of appliances scales up and the interested appliances consume only tens or a hundred watts. Step changes in the aggregated power are swamped in noise.  A low pass filter is not suitable in this case because the noises have the same frequency as the step changes that we want to preserve. 
+ The problem is not particularly significant in previous research, because previously, people mostly focus on few appliances with very large power consumption, such as dish washers, heaters or ovens.
+ 
+Several methods have been used in previous work to remove noise or detect step-change in the power trace. In \cite{Hart1992}, the author developed an edge detection algorithm. It looks for stable periods where the variation is less than a threshold (15W or VAR). The method works only when the step changes are much larger than the variation, which is not true in our case. In \cite{Norford1996}, the authors used a median filter to remove spikes in the raw signal. Total variation denoising is used in \cite{Kolter2012}. The method can effectively remove noises in the signal and preserve steps. However, its purpose is not step detection. Hence, its output is not guaranteed to be a piecewise constant signal with sparse steps. 
 
-Several methods have been used in previous work to remove noise or detect step-change in the power trace. In \cite{Hart1992}, the author developed an edge detection algorithm. It looks for stable periods within the signal with variation less than a threshold (15W or VAR). The method works only when the step changes are much larger than the variation, which is not true in our case. In \cite{Norford1996}, the authors use a median filter to remove spikes in the raw signal. Total variation denoising is used in \cite{Kolter2012}. The method can effectively remove noises in the signal and preserve steps. However, its purpose is not step detection. Hence, its output is not guaranteed to be piecewise constant. 
+A method called jump penalization is introduced in \cite{Little2011}. The original method is an offline one. The algorithm begins with a constant signal as the estimation of the input signal. Usually the mean or median value is used for the initial estimation. In each iteration, a greedy search tries to insert the best new step-change in the current estimation. The algorithm ends when the improvement of estimation accuracy by inserting new step-changes is too small. The algorithm guarantees piecewise constant output, and the step-changes are explicitly found in each iteration. 
 
-A method called jump penalization is introduced in \cite{Little2011}. The original method is an offline one. The algorithm begins with a constant signal that estimates the input signal, which is usually the mean or median value of the input signal. In each iteration, a greedy search tries to insert a best new step-change in the current estimation. The algorithm ends when the improvement of estimation accuracy by inserting new step-changes is too small. The algorithm guarantees piecewise constant output, and the step-changes are explicitly found in each iteration. 
-
-We adopted the algorithm to an online version, which can process the data in real time.  Instead of inserting step-changes iteratively, we insert just one step-change from the last step-change to the current sample. The flow chart of our step-detection algorithm is shown in Fig.\ref{fig:pwc}. The error function is defined as following: \[E(x,y) = \frac{1}{2} \sum_n \left(x_n - y_n\right)^2\]
+In this work, we adopt the algorithm to an online variant, which can process the data in real time.  Instead of inserting step-changes iteratively, we insert step-changes one by one as new samples come in. When new samples come in, we consider adding at most one new step in the period of time from last step-change to the current sample. The flow chart of our step-detection algorithm is shown in Fig.\ref{fig:pwc}. The error function is defined as following: \[E(x,y) = \frac{1}{2} \sum_n \left(x_n - y_n\right)^2\]
 
 \begin{figure}[htb]
   \centering
@@ -36,28 +37,27 @@ We adopted the algorithm to an online version, which can process the data in rea
   \label{fig:pwc}
 \end{figure}
 
-The parameter $\gamma$ acts as a threshold in the algorithm, or 'penalty' to insert a new step-change. With a lower $\gamma$, the algorithm is more likely to detect steps. We use a time-variant $\gamma_t$ based on our knowledge about events. When there are events detected by the sensor network, we use the lower $\gamma_l$ so that it is more likely to detect small step changes. When no events are detected, we use the higher $\gamma_h$ to reduce false steps. In practice, when the power signal is in kW, we choose $\gamma_l = 0.0001$ and $\gamma_h=0.0025$. 
+The parameter $\gamma$ acts as a threshold in the algorithm, or 'penalty' to insert a new step-change. With a lower $\gamma$, the output contains more steps. Instead of a constant $\gamma$, We use a time-variant $\gamma_t$ based on our knowledge about events. When there are events detected by the sensor network, we use the lower $\gamma_l$ so that it is more likely to detect small step changes. When no events are detected, we use the higher $\gamma_h$ to reduce false alarms. In practice, when the power signal is in kW, we choose $\gamma_l = 0.0001$ and $\gamma_h=0.0025$. 
 
-We also limit the length of signal buffer to $L_{max}$, so that the greedy search domain is limited to the last $L_{max}$ samples. Otherwise, the buffer can grow indefinitely when there is no step-change in a very long time. 
+We also limit the length of signal buffer to $L_{max}$, so that the greedy search domain is limited to the last $L_{max}$ samples. Otherwise, the buffer can grow indefinitely when there is no step-change for a long time. 
 
 \subsection{Overlapping events disaggregation}
 
-When multiple events happen close enough, only the aggregated effect will shown on the power readings at the central meter. In this case, we use the historical data to estimate the power changes. To be specific, we use the median value of all power changes that we observed before on non-overlapping events of a particular appliance. This works under the assumption that all appliances have binary on-off states.
+When multiple events happen close enough, only the aggregated effect will shown on the power readings at the central meter. In this case, we use the historical data to estimate the power changes. Specifically, we use the median value of all power changes that we observed before on non-overlapping events of a particular appliance. This works under the assumption that all appliances have binary on-off states.
 
 \section{Experimental results}
 
-We deployed an experimental setup in our lab, which is a mixed office and lab setting. All the interested appliances are arranged on 4 branch circuits, in order to minimize the interference from other appliances. The lab has 20 branch circuits in total, which is monitored by a Veris E30A panel energy meter\footnote{http://www.veris.com/}. We collect data from the meter at an interval of 2 seconds, and use the sum of power reading on the 4 branch circuits as the aggregated power reading.
+We deployed an experimental setup in our lab. It is a mixed office and lab setting. All the interested appliances are arranged on 4 branch circuits, in order to minimize the interference from other appliances. The lab has 20 branch circuits in total, which is monitored by a Veris E30A panel energy meter\footnote{http://www.veris.com/}. We collect data from the meter at an interval of 2 seconds, and use the sum of power readings on the 4 branch circuits as the aggregated power reading.
 
 We have 20 sensor nodes deployed, including 9 LCD monitors, 8 laptop computers, a solder station, a workbench light and a water dispenser. Most appliances are binary-state, except the water dispenser, which has both cooler and heater, and they work independently like two separate appliances. 
 
-There are 11 appliances that we have instrumented with \textit{Watts up? PRO} meters. These meters captures the power consumption of individual appliances and log the data on a server through Gumstix nodes. These data serve as the ground truth. They are not used in any way in the energy disaggregation and inferencing process. 
+There are 11 appliances that we have instrumented with \textit{Watts up? PRO} meters. These meters capture the power consumption of individual appliances and log the data on a server through Gumstix nodes. These data serve as the ground truth. They are not used in any way in the energy disaggregation and inferencing process. 
 
 The dataset used in this section is a 7-day long dataset collected from June 1st-7th, 2012. 
 
 \subsection{Step detection results}
 
-Fig.\ref{fig:pwc-example} shows some signal snippets with their PWC denoising and step detection results. The high power device showing in the figure is the water dispenser heater. Except that, other power steps are mostly tens of watts. And there is a oscillating power variation in the power signal due to some laptop computers. The PWC denoising algorithm can detect steps in the same order of magnitude as the variation. 
-
+Fig.\ref{fig:pwc-example} shows some signal snippets with PWC denoising and step detection results. The big steps showing in the figure is the water dispenser heater. Except that, other power steps are mostly tens of Watts. And there is a oscillating noise in the power signal due to some laptop computers. The PWC denoising algorithm can detect steps in the same order of magnitude as the noise. 
 
 \begin{figure}[htbp]
     \centering
@@ -85,9 +85,9 @@ Fig.\ref{fig:pwc-example} shows some signal snippets with their PWC denoising an
     \caption{Signal snippets showing PWC denoising results}\label{fig:pwc-example}
 \end{figure}
 
-\subsection{Appliance state detection accuracy}
+\subsection{Appliance state tracking accuracy}
 
-We use the state change events that the sensors detected to reconstruct the state of each individual appliances over time. We also threshold the ground truth consumption of some individual appliances to obtain the ground truth of state. By comparing appliance states collected by our sensors with the ground truth, we show the accuracy of our system. We measure accuracy by precision and recall, defined as following:
+We use the state change events that the sensors detected to reconstruct the state of each individual appliances over time. By comparing appliance states collected by our sensors with the ground truth, we show the accuracy of our system. We measure accuracy by precision and recall, defined as following:
 \[
 \text{Precision} = \frac{tp}{tp+fp} = 
 \frac{\text{Time appliance is on and reported on}}
@@ -99,7 +99,7 @@ We use the state change events that the sensors detected to reconstruct the stat
 {\text{Time appliance is on}}
 \]
 
-Table \ref{tab:pre-recall} shows the statistics of appliances with power ground truth. Here, an appliance is considered in on state when its power consumption is greater than 5W. The table shows power-on time, reported-on time, reported-on-and-indeed-on time, along with precision and recall. Fig.\ref{fig:state-1-2-3-5}-\ref{fig:state-17-18-21} shows the power consumption over time of the appliances. The solid traces are power ground truth of each individual appliance. Shaded area shows the period when our sensors report power-on. We can tell from the data that our system can provide very reliable and accurate appliance state data.
+Table \ref{tab:pre-recall} shows the statistics of state tracking with ground truth. Here, an appliance is considered in on state when its power consumption is greater than 5W. The table shows power-on time, reported-on time, reported-on-and-indeed-on time, along with precision and recall. Fig.\ref{fig:state-1-2-3-5}-\ref{fig:state-17-18-21} shows the power consumption over time of the appliances. The solid traces are power ground truth of each individual appliance. Shaded area shows the period when our sensors report power-on. We can tell from the data that our system can provide very reliable and accurate appliance state data.
 
 \begin{table}
   \centering
@@ -206,11 +206,11 @@ Table \ref{tab:pre-recall} shows the statistics of appliances with power ground 
 
 \subsection{Energy consumption of individual appliances}
 
-Once we have reliable appliance power states and the step changes in the aggregated power, we can estimate the power traces of each individual appliance, according to the algorithm proposed previously. 
+Once we have reliable appliance power states and the step changes in the aggregated power, we can estimate the power traces of individual appliances, according to the algorithm discussed previously. 
 
-Table \ref{tab:disagg} shows the energy consumption estimation of the appliances. For those appliances instrumented with ground truth power readings, we show both the true energy consumption over the 7-day period of the dataset, and the estimated energy consumption. For those appliances without ground truth power readings, only the estimation is shown. In the experiments, we found that appliance \#1 and \#2, which are two monitors, are working in complete synchrony. Theoretically, there is no way to distinguish the power consumption of them other than direct metering them separately. Hence, we regard them as a combined single appliance. 
+Table \ref{tab:disagg} shows the energy consumption estimation of the appliances. For those appliances instrumented with ground truth power readings, we show both the true energy consumption over the 7-day period of the dataset, and the estimated energy consumption. For those appliances without ground truth power readings, only the estimation is shown. In the experiments, we found that appliance \#1 and \#2, which are two monitors, are working in complete synchrony. Theoretically, there is no way to distinguish the power consumption of them other than metering them separately. Hence, we regard them as a single combined appliance. 
 
-The estimation error shows big difference among different appliances. For most appliances, the error is less than 30\%. However, for monitors \#1+2, laptop \#3 and laptop \#5, the error is large. Generally, LCD monitors, which have stable on-state power, have more accurate results, while energy estimation for laptops are less accurate. This is because the power of a on-state laptop can vary as much as 1/3 over time, due to different load, battery status, etc. Other causes of inaccuracy include lack of state changes. Some appliances are kept on or off for a long time, and there are only few state changes. In this case, the errors in the step detection will keep accumulating. Monitors \#1+2 and laptop \#3 all fall in this case. They have just 3-5 state changes during the period of the dataset. 
+The estimation error differs very much among different appliances. For most appliances, the error is less than 30\%. However, for monitors \#1+2, laptop \#3 and laptop \#5, the error is large. Generally, LCD monitors, which have stable on-state power, have more accurate results, while energy estimation for laptops are less accurate. This is because the power of an on-state laptop can vary as much as one third over time, due to different load, battery charging status, etc. Other causes of inaccuracy include lack of state changes. Some appliances are kept on or off for a long time, and there are only few state changes. In this case, the errors in the power step detection will keep accumulating. Monitors \#1+2 and laptop \#3 all fall in this case. They have just 3-5 state changes during the period of the dataset. 
 
 Fig.\ref{fig:power-1-2-3-5-8}-\ref{fig:power-18-21} displays some snippets of estimated power vs ground truth for several appliances. 
 
