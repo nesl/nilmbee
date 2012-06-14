@@ -1,0 +1,8 @@
+Receiver program:
+
+http://mbed.org/users/the729/programs/recv315test5/mbme7a
+
+The photo shows the connections. Simply power the receiver module, and connect the data to p16 of mbed. 
+Remember to put big capacitors on both side of the power of the receiver. 
+Use 1 feet long wire as the antenna. 
+
