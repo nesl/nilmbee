@@ -1,0 +1,45 @@
+doc/
+    documents except this file
+hw/
+    hardware design of the nilmbee sensor node
+sw/
+    everything about software
+    
+To setup the whole system, you need the following things:
+
+1) The sensors.
+Refer to hw and sw/firmware*. 
+sw/firmware is a node firmware that can detect current changes.
+sw/firmware-binary is the firmware that detect only binary events. This one is used in my work.
+
+2) The basestation hardware.
+Refer to sw/mbed-basestation
+There you can find a link to my mbed code, and a photo about how to setup the receiver. 
+
+3) Basestation logger on the PC.
+Refer to sw/pc/dumpdata2.py
+It dumps all received data to stdout as well as log/log-sensor.txt, in a format that is used everywhere:
+timestamp   sensor_id   group_id   slot_id   seq   event
+
+3) Panel meter logger
+Main program is not included in the repo. Go download CSocket.zip on internal wiki.
+There is a script I used to collect the data. Refer to sw/pc/panel-meter-script
+
+4) Gumstix for ground truth
+Refer to sw/pc/wattsup/gumstix
+Archive is the old code by Han Zhao. I'm using a simpler version that just store everything to a mysql server.
+wattsup_http.conf is the config file. Run wattsup_http.py on gumstix. 
+
+5) Ground truth php server
+Refer to sw/pc/wattsup/web
+The mysql structure is in a .sql file. 
+log.php is for Gumstixs to upload logs. 
+query.php is for downloading groundtruth for a single device for a certain period of time.
+status.php is for monitoring the data rates. 
+
+6) Downloading ground truth
+Each dataset should contain the following file:
+kw-sep.log, time.log, log-sensor.txt
+When these files are available, run sw/pc/wattsup/web/powertruth.sh from the logging directory
+It will automatically create a truth/ directory and pull the ground truth from the web server in 5). 
+
